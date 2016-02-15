@@ -1,0 +1,26 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "github.com/fatih/color",
+			"revision": "7a5857db0b2752a436d8461d88c42dea0ee191c0",
+			"revisionTime": "2016-02-12T11:24:09+02:00"
+		},
+		{
+			"path": "github.com/mattn/go-colorable",
+			"revision": "9fdad7c47650b7d2e1da50644c1f4ba7f172f252",
+			"revisionTime": "2016-02-10T09:18:57+09:00"
+		},
+		{
+			"path": "github.com/mattn/go-isatty",
+			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
+			"revisionTime": "2015-12-11T09:06:21+09:00"
+		},
+		{
+			"path": "github.com/octavore/naga/service",
+			"revision": "0e0067d9df2339a403ed6627aab8dbb58a96d26e",
+			"revisionTime": "2016-02-14T18:20:57-08:00"
+		}
+	]
+}
