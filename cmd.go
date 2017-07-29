@@ -33,6 +33,13 @@ func (a *App) addCommands(c *service.Config) {
 	})
 
 	c.AddCommand(&service.Command{
+		Keyword:    "rm-dest <domain>",
+		ShortUsage: "remove mapping for <domain>",
+		Usage:      "Remove mapping for <domain>.",
+		Run:        a.cmdRmHost,
+	})
+
+	c.AddCommand(&service.Command{
 		Keyword:    "version",
 		ShortUsage: "print version",
 		Usage:      "Print version",
@@ -130,4 +137,31 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		ctx.Fatal(err.Error())
 	}
 	fmt.Printf("registered: %s => %s\n", host, dest)
+}
+
+func (a *App) cmdRmHost(ctx *service.CommandContext) {
+	ctx.RequireExactlyNArgs(1)
+	err := a.loadConfig()
+	if err != nil {
+		// todo: more helpful error if config.json does not exist
+		ctx.Fatal(err.Error())
+	}
+
+	host := ctx.Args[0]
+	entries := []Entry{}
+	for _, e := range a.config.Entries {
+		if e.Source != host {
+			entries = append(entries, e)
+		}
+	}
+	a.config.Entries = entries
+	b, err := json.MarshalIndent(a.config, "", "  ")
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	err = ioutil.WriteFile(a.configPath(), b, os.ModePerm)
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	fmt.Printf("removed: %s\n", host)
 }
