@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/octavore/naga/service"
 )
@@ -26,9 +26,9 @@ func (a *App) addCommands(c *service.Config) {
 	})
 
 	c.AddCommand(&service.Command{
-		Keyword:    "set-dest <host> <dest>",
-		ShortUsage: "map <host> to <dest>",
-		Usage:      "Map <host> to <dest>",
+		Keyword:    "set-dest <domain> <port>",
+		ShortUsage: "map <domain> to <port>",
+		Usage:      "Map <domain> to <port>",
 		Run:        a.cmdSetHost,
 	})
 
@@ -100,26 +100,25 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		ctx.Fatal(err.Error())
 	}
 
-	host, dest := ctx.Args[0], ctx.Args[1]
-	u, err := url.Parse(dest)
+	host := ctx.Args[0]
+	port, err := strconv.Atoi(ctx.Args[1])
 	if err != nil {
-		ctx.Fatal("failed to parse dest url: %s", err)
+		ctx.Fatal("expected port to be an int")
 	}
-	us := u.String()
-	// todo: check if host already exists
 
+	dest := fmt.Sprintf("localhost:%d", port)
 	found := false
 	for _, e := range a.config.Entries {
 		if e.Source == host {
 			fmt.Printf("replacing existing entry for %s: %s\n", host, *e.DestHost)
-			e.DestHost = &us
+			e.DestHost = &dest
 			found = true
 		}
 	}
 	if !found {
 		a.config.Entries = append(a.config.Entries, Entry{
 			Source:   host,
-			DestHost: &us,
+			DestHost: &dest,
 		})
 	}
 	b, err := json.MarshalIndent(a.config, "", "  ")
@@ -130,5 +129,5 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
-	fmt.Printf("registered: %s => %s\n", host, u.String())
+	fmt.Printf("registered: %s => %s\n", host, dest)
 }
