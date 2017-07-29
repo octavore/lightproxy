@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/octavore/naga/service"
@@ -29,6 +30,13 @@ func (a *App) addCommands(c *service.Config) {
 		ShortUsage: "Map <domain> to <port>",
 		Usage:      "Map <domain> to <port>",
 		Run:        a.cmdSetHost,
+	})
+
+	c.AddCommand(&service.Command{
+		Keyword:    "set-dir <domain> <folder>",
+		ShortUsage: "Map <domain> to files in <folder>",
+		Usage:      "Map <domain> to files in <folder>",
+		Run:        a.cmdSetHostFolder,
 	})
 
 	c.AddCommand(&service.Command{
@@ -118,6 +126,7 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		if e.Source == host {
 			fmt.Printf("replacing existing entry for %s: %s\n", host, *e.DestHost)
 			e.DestHost = &dest
+			e.DestFolder = nil
 			found = true
 		}
 	}
@@ -132,6 +141,42 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		ctx.Fatal(err.Error())
 	}
 	fmt.Printf("registered: %s => %s\n", host, dest)
+}
+
+func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
+	ctx.RequireExactlyNArgs(2)
+	err := a.loadConfig()
+	if err != nil {
+		// todo: more helpful error if config.json does not exist
+		ctx.Fatal(err.Error())
+	}
+
+	host, dir := ctx.Args[0], ctx.Args[1]
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	fmt.Println(absDir)
+	found := false
+	for _, e := range a.config.Entries {
+		if e.Source == host {
+			fmt.Printf("replacing existing entry for %s: %s\n", host, *e.DestHost)
+			e.DestHost = nil
+			e.DestFolder = &absDir
+			found = true
+		}
+	}
+	if !found {
+		a.config.Entries = append(a.config.Entries, Entry{
+			Source:     host,
+			DestFolder: &absDir,
+		})
+	}
+	err = a.writeConfig()
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	fmt.Printf("registered: %s => %s\n", host, absDir)
 }
 
 func (a *App) cmdRmHost(ctx *service.CommandContext) {
