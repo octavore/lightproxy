@@ -43,3 +43,11 @@ func (a *App) loadConfig() error {
 	a.config = &Config{}
 	return json.Unmarshal(f, a.config)
 }
+
+func (a *App) writeConfig() error {
+	b, err := json.MarshalIndent(a.config, "", "  ")
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(a.configPath(), b, os.ModePerm)
+}

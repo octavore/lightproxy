@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 
@@ -128,11 +127,7 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 			DestHost: &dest,
 		})
 	}
-	b, err := json.MarshalIndent(a.config, "", "  ")
-	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	err = ioutil.WriteFile(a.configPath(), b, os.ModePerm)
+	err = a.writeConfig()
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
@@ -155,11 +150,7 @@ func (a *App) cmdRmHost(ctx *service.CommandContext) {
 		}
 	}
 	a.config.Entries = entries
-	b, err := json.MarshalIndent(a.config, "", "  ")
-	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	err = ioutil.WriteFile(a.configPath(), b, os.ModePerm)
+	err = a.writeConfig()
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
