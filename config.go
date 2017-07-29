@@ -1,48 +1,45 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
-	"strings"
+	"encoding/json"
+	"io/ioutil"
+	"os"
+	"os/user"
+	"path"
 )
 
-type Entry struct {
-	Source     string  `json:"host"`
-	DestHost   *string `json:"dest,omitempty"`
-	DestFolder *string `json:"dest_folder,omitempty"`
-}
-
 type Config struct {
+	TLD       string  `json:"tld"`
 	Addr      string  `json:"addr"`
 	AdminAddr *string `json:"admin_addr"`
 	Entries   []Entry `json:"entries"`
 }
 
-func (e *Entry) handle() (http.Handler, error) {
-	if e.DestHost != nil {
-		if !strings.HasPrefix(*e.DestHost, "http") {
-			*e.DestHost = "http://" + *e.DestHost
+func (a *App) configDir() string {
+	c := os.Getenv("XDG_CONFIG_HOME")
+	if c == "" {
+		u, err := user.Current()
+		if uid := os.Getenv("SUDO_UID"); uid != "" {
+			u, err = user.LookupId(uid)
 		}
-		u, err := url.Parse(*e.DestHost)
 		if err != nil {
 			panic(err)
 		}
-		return httputil.NewSingleHostReverseProxy(u), nil
+
+		c = path.Join(u.HomeDir, defaultConfigDir)
 	}
-	if e.DestFolder != nil {
-		return http.FileServer(http.Dir(*e.DestFolder)), nil
-	}
-	return nil, fmt.Errorf("entry: no dest or dest_folder provided")
+	return path.Join(c, "lightproxy")
 }
 
-func (e *Entry) dest() string {
-	if e.DestHost != nil {
-		return *e.DestHost
+func (a *App) configPath() string {
+	return path.Join(a.configDir(), "config.json")
+}
+
+func (a *App) loadConfig() error {
+	f, err := ioutil.ReadFile(a.configPath())
+	if err != nil {
+		return err
 	}
-	if e.DestFolder != nil {
-		return *e.DestFolder
-	}
-	return ""
+	a.config = &Config{}
+	return json.Unmarshal(f, a.config)
 }

@@ -10,6 +10,38 @@ import (
 	"github.com/octavore/naga/service"
 )
 
+func (a *App) addCommands(c *service.Config) {
+	c.AddCommand(&service.Command{
+		Keyword:    "init",
+		ShortUsage: "initialize the config file",
+		Usage:      "Initialize a default config file if it doesn't already exist, and print its location",
+		Run:        a.cmdInitConfig,
+	})
+
+	c.AddCommand(&service.Command{
+		Keyword:    "config",
+		ShortUsage: "prints the config file",
+		Usage:      "Prints the config files",
+		Run:        a.cmdPrintConfig,
+	})
+
+	c.AddCommand(&service.Command{
+		Keyword:    "set-dest <host> <dest>",
+		ShortUsage: "map <host> to <dest>",
+		Usage:      "Map <host> to <dest>",
+		Run:        a.cmdSetHost,
+	})
+
+	c.AddCommand(&service.Command{
+		Keyword:    "version",
+		ShortUsage: "print version",
+		Usage:      "Print version",
+		Run: func(*service.CommandContext) {
+			fmt.Println("lightproxy", version)
+		},
+	})
+}
+
 func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 	fi, err := os.Stat(a.configPath())
 	if fi != nil && err == nil {
@@ -32,7 +64,8 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 	}
 
 	b, err := json.MarshalIndent(&Config{
-		Addr:    ":80",
+		Addr:    ":7999",
+		TLD:     "test",
 		Entries: []Entry{},
 	}, "", "  ")
 	if err != nil {

@@ -22,7 +22,11 @@ var colors = []formatter{
 func (a *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if h := a.handlers[req.Host]; h != nil {
 		i := a.handlerIndex[req.Host] % len(colors)
-		log.Println(colors[i](req.Host), req.URL.String())
+		pth := req.URL.Path
+		if req.URL.RawQuery != "" {
+			pth += "?" + req.URL.RawQuery
+		}
+		log.Println(colors[i](req.Host), pth)
 		h.ServeHTTP(rw, req)
 		return
 	}
