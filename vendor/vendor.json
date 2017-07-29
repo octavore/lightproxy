@@ -18,9 +18,11 @@
 			"revisionTime": "2015-12-11T09:06:21+09:00"
 		},
 		{
+			"checksumSHA1": "utxVR7t9nTiSfS+icPbmliS3aAs=",
 			"path": "github.com/octavore/naga/service",
-			"revision": "0e0067d9df2339a403ed6627aab8dbb58a96d26e",
-			"revisionTime": "2016-02-14T18:20:57-08:00"
+			"revision": "7f3072b01689ed9a28e0bb0d9363e42335a5271f",
+			"revisionTime": "2017-07-29T05:58:18Z"
 		}
-	]
+	],
+	"rootPath": "github.com/octavore/lightproxy"
 }

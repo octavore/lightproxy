@@ -13,6 +13,10 @@ type Flag struct {
 	Usage string
 }
 
+func (f *Flag) Present() bool {
+	return f.Value != nil
+}
+
 // Command represents a command-line keyword for the app.
 // This is then typically invoked as follows:
 //   ./myapp <keyword>
@@ -27,6 +31,12 @@ type Command struct {
 // AddCommand adds a command to the service via its Config.
 func (c *Config) AddCommand(cmd *Command) {
 	c.service.registerCommand(cmd)
+}
+
+// SetDefaultCommand sets the given command to be the default when
+// the app is started without a command.
+func (c *Config) SetDefaultCommand(keyword string) {
+	c.service.defaultCommand = keyword
 }
 
 // CommandContext is passed to the command when it is run,

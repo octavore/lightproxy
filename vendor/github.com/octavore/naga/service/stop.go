@@ -7,6 +7,9 @@ import (
 // Stop the app by closing the stop channel. Used for testing.
 func (s *Service) Stop() {
 	close(s.stopper)
+
+	// wait for all running modules to stop. todo: timeout?
+	s.running.Wait()
 }
 
 // stop in reverse topological order

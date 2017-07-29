@@ -20,21 +20,33 @@ func (s *Service) StartForTest() func() {
 		panic(err)
 	}
 	go s.start()
+	s.started.Wait()
 	return s.Stop
 }
 
 // start calls Start on each module, in goroutines. Assumes that
-// setup() has already been called. Blocks.
+// setup() has already been called. Start command must not block.
 func (s *Service) start() {
 	for _, m := range s.modules {
 		n := getModuleName(m)
 		c := s.configs[n]
 		BootPrintln("[service] starting", n)
 		if c.Start != nil {
-			go c.Start()
+			c.Start()
 		}
 	}
+	// mark as started
+	s.started.Done()
+
+	// mark process as running
+	s.running.Add(1)
+
+	// wait for a stop signal to be received
+	// note: that c might crash without this parent goroutine knowing.
 	s.wait()
+
+	// mark process as done
+	s.running.Done()
 }
 
 // wait blocks until a signal is received, or the stopper channel is closed

@@ -46,7 +46,7 @@ func (e Environment) IsTest() bool {
 func (e Environment) String() string {
 	s := EnvMap[e]
 	if len(s) == 0 {
-		return ""
+		return "unknown"
 	}
 	return s[0]
 }

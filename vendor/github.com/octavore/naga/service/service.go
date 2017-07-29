@@ -3,8 +3,17 @@ package service
 import (
 	"flag"
 	"fmt"
+	"log"
+	"os"
 	"strings"
+	"sync"
 )
+
+func init() {
+	if os.Getenv("DEBUG") != "" {
+		BootPrintln = log.Println
+	}
+}
 
 // BootPrintln can be replaced with log.Println for printing debug information.
 var BootPrintln = func(v ...interface{}) {}
@@ -20,6 +29,11 @@ type Service struct {
 	modules  []Module
 	configs  map[string]*Config
 	commands map[string]*Command
+
+	defaultCommand string
+
+	started sync.WaitGroup
+	running sync.WaitGroup
 }
 
 // New creates a new service with Module m as the entry point
@@ -37,7 +51,27 @@ func New(m Module) *Service {
 // NewApp creates a new app with Module m as the entry point. Unlike
 // New, `start` is not automatically registered.
 func NewApp(m Module) *Service {
-	return loadEnv(m, GetEnvironment())
+	svc := loadEnv(m, GetEnvironment())
+	svc.commands["help"] = &Command{
+		Keyword: "help <command>",
+		Run: func(ctx *CommandContext) {
+			ctx.RequireExactlyNArgs(1)
+			cmd := svc.commands[ctx.Args[0]]
+			if cmd == nil {
+				fmt.Printf("Unknown command: %s\n", ctx.Args[0])
+				return
+			}
+			fmt.Printf("Usage of %s %s\n", os.Args[0], cmd.Keyword)
+			if cmd.Usage == "" {
+				fmt.Println(cmd.ShortUsage)
+			} else {
+				fmt.Println(cmd.Usage)
+			}
+		},
+		ShortUsage: "Additional info for <command>",
+		Usage:      "Show additional info for <command>",
+	}
+	return svc
 }
 
 // Run is a convenience method equivalent to "New(...).Run()"
@@ -48,29 +82,46 @@ func Run(m Module) {
 // Load the app with the given environment, and initializes
 // all modules recursively starting with m.
 func loadEnv(m Module, env Environment) *Service {
+	BootPrintln("[service] env is", env.String())
 	svc := &Service{
 		Env:      env,
 		stopper:  make(chan bool),
 		modules:  []Module{},
 		configs:  map[string]*Config{},
 		commands: map[string]*Command{},
+		started:  sync.WaitGroup{},
 	}
+	svc.started.Add(1)
 	svc.load(m)
 	return svc
 }
 
 // Usage prints the usage for all registered commands.
 func (s *Service) Usage() {
+	fmt.Printf("Usage of %s\n", os.Args[0])
+	if s.commands["help"] != nil {
+		fmt.Printf("    %-16s %s\n", "help", s.commands["help"].ShortUsage)
+	}
+	if s.commands["start"] != nil {
+		fmt.Printf("    %-16s %s\n", "start", s.commands["start"].ShortUsage)
+	}
 	for k, cmd := range s.commands {
+		if k == "start" || k == "help" {
+			continue
+		}
 		fmt.Printf("    %-16s %s\n", k, cmd.ShortUsage)
 	}
 }
 
 // Run parses arguments from the command line and passes them to RunCommand.
 func (s *Service) Run() {
+	flag.Usage = s.Usage
 	flag.Parse()
 	args := flag.Args()
-	if len(args) < 1 {
+	if len(args) == 0 && s.defaultCommand != "" {
+		args = append([]string{s.defaultCommand}, args...)
+	}
+	if len(args) == 0 {
 		s.Usage()
 		BootPrintln()
 		return
