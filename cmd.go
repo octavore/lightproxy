@@ -12,35 +12,35 @@ import (
 func (a *App) addCommands(c *service.Config) {
 	c.AddCommand(&service.Command{
 		Keyword:    "init",
-		ShortUsage: "initialize the config file",
+		ShortUsage: "Initialize the config file",
 		Usage:      "Initialize a default config file if it doesn't already exist, and print its location",
 		Run:        a.cmdInitConfig,
 	})
 
 	c.AddCommand(&service.Command{
 		Keyword:    "config",
-		ShortUsage: "prints the config file",
-		Usage:      "Prints the config files",
+		ShortUsage: "Prints the config file",
+		Usage:      "Prints the config file",
 		Run:        a.cmdPrintConfig,
 	})
 
 	c.AddCommand(&service.Command{
 		Keyword:    "set-dest <domain> <port>",
-		ShortUsage: "map <domain> to <port>",
+		ShortUsage: "Map <domain> to <port>",
 		Usage:      "Map <domain> to <port>",
 		Run:        a.cmdSetHost,
 	})
 
 	c.AddCommand(&service.Command{
 		Keyword:    "rm-dest <domain>",
-		ShortUsage: "remove mapping for <domain>",
-		Usage:      "Remove mapping for <domain>.",
+		ShortUsage: "Remove mapping for <domain>",
+		Usage:      "Remove mapping for <domain>",
 		Run:        a.cmdRmHost,
 	})
 
 	c.AddCommand(&service.Command{
 		Keyword:    "version",
-		ShortUsage: "print version",
+		ShortUsage: "Print version",
 		Usage:      "Print version",
 		Run: func(*service.CommandContext) {
 			fmt.Println("lightproxy", version)
