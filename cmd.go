@@ -71,7 +71,7 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 
 	b, err := json.MarshalIndent(&Config{
 		Addr:    ":7999",
-		TLD:     "test",
+		TLD:     "wip",
 		Entries: []Entry{},
 	}, "", "  ")
 	if err != nil {
