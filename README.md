@@ -1,8 +1,8 @@
 # lightproxy
 
-Lightweight proxy, useful for developing local services.
+Lightweight proxy, useful for giving your local services memorable local domain names like `myproject.wip` instead of `localhost:8000`.
 
-## Example Usage
+## Usage
 
 ### Installation (brew)
 
@@ -10,27 +10,26 @@ Lightweight proxy, useful for developing local services.
 brew install octavore/tools/lightproxy
 ```
 
-### Registering URL mapping
+### Registering URL mappings
 
-To map `foo.dev` to `localhost:3000`:
+To map `foo.wip` to `localhost:3000`:
 
 ```bash
-# add mapping to hosts file
-echo "127.0.0.1 foo.dev" | sudo tee --append /etc/hosts
-lightproxy set-dest foo.dev localhost
+lightproxy set-dest foo.wip 3000
 ```
 
-### Starting server
+To map `foo.wip` to a folder:
 
+```bash
+lightproxy set-dir foo.wip ~/Code/foo/
 ```
-# sudo is used to allow lightproxy to listen on port 80
-sudo lightproxy start
-```
+
+### Starting lightproxy
+
+Open up a new terminal shell and run `lightproxy`.
 
 ## todo
 
 - daemon mode
 - path based routing
-- automatically add to host file
-- drop privileges
 - prettier UI
