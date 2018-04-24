@@ -53,6 +53,8 @@ func (a *App) Init(c *service.Config) {
 		router.Handle("/", a)
 		router.HandleFunc("/proxy.pac", a.pacFile)
 
+		fmt.Printf("proxy URL: http://%s/proxy.pac\n", a.config.Addr)
+
 		err = http.ListenAndServe(a.config.Addr, router)
 		if err != nil {
 			fmt.Println(err)
