@@ -28,8 +28,18 @@ lightproxy set-dir foo.wip ~/Code/foo/
 
 Open up a new terminal shell and run `lightproxy`.
 
+### Configure your system proxy (MacOS)
+
+1. Go to System Preferences > Network > Proxies.
+2. Select and check **Automatic Proxy Configuration** in the sidebar.
+3. Set the URL to http://localhost:7999/proxy.pac
+
+![screen shot 2018-06-26 at 8 46 00 pm](https://user-images.githubusercontent.com/1707744/41951981-87e8f856-7982-11e8-8e95-c06cca186eb3.png)
+
 ## todo
 
 - daemon mode
 - path based routing
 - prettier UI
+
+
