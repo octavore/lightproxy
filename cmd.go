@@ -77,13 +77,12 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 		ctx.Fatal("failed to create dir %s: %s", a.configDir(), err)
 	}
 
-	localhost8000 := "localhost:8000"
 	b, err := json.MarshalIndent(&Config{
 		Addr: "localhost:7999",
 		TLD:  "wip",
 		Entries: []Entry{{
 			Source:   "ketchup.wip",
-			DestHost: &localhost8000,
+			DestHost: "localhost:8000",
 		}},
 	}, "", "  ")
 	if err != nil {
@@ -128,16 +127,16 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 	found := false
 	for _, e := range a.config.Entries {
 		if e.Source == host {
-			fmt.Printf("replacing existing entry for %s: %s\n", host, *e.DestHost)
-			e.DestHost = &dest
-			e.DestFolder = nil
+			fmt.Printf("replacing existing entry for %s: %s\n", host, e.DestHost)
+			e.DestHost = dest
+			e.DestFolder = ""
 			found = true
 		}
 	}
 	if !found {
 		a.config.Entries = append(a.config.Entries, Entry{
 			Source:   host,
-			DestHost: &dest,
+			DestHost: dest,
 		})
 	}
 	err = a.writeConfig()
@@ -164,16 +163,16 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 	found := false
 	for _, e := range a.config.Entries {
 		if e.Source == host {
-			fmt.Printf("replacing existing entry for %s: %s\n", host, *e.DestHost)
-			e.DestHost = nil
-			e.DestFolder = &absDir
+			fmt.Printf("replacing existing entry for %s: %s\n", host, e.DestHost)
+			e.DestHost = ""
+			e.DestFolder = absDir
 			found = true
 		}
 	}
 	if !found {
 		a.config.Entries = append(a.config.Entries, Entry{
 			Source:     host,
-			DestFolder: &absDir,
+			DestFolder: absDir,
 		})
 	}
 	err = a.writeConfig()
