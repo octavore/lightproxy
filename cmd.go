@@ -77,10 +77,14 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 		ctx.Fatal("failed to create dir %s: %s", a.configDir(), err)
 	}
 
+	localhost8000 := "localhost:8000"
 	b, err := json.MarshalIndent(&Config{
-		Addr:    ":7999",
-		TLD:     "wip",
-		Entries: []Entry{},
+		Addr: "localhost:7999",
+		TLD:  "wip",
+		Entries: []Entry{{
+			Source:   "ketchup.wip",
+			DestHost: &localhost8000,
+		}},
 	}, "", "  ")
 	if err != nil {
 		ctx.Fatal("failed to to create config.json file: %s", err)
