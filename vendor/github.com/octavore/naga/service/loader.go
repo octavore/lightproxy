@@ -18,7 +18,6 @@ func (s *Service) load(m Module) {
 	}
 
 	s.configs[moduleName] = nil
-	// maybe also store a context.Context? Or some other boot time config.
 	config = &Config{parent: m, service: s}
 	BootPrintln("[service] initializing", moduleName)
 	m.Init(config)

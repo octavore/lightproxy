@@ -3,25 +3,34 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "HbOJxa+FsQ1TTsF+BkHAvzqqZv4=",
 			"path": "github.com/fatih/color",
-			"revision": "7a5857db0b2752a436d8461d88c42dea0ee191c0",
-			"revisionTime": "2016-02-12T11:24:09+02:00"
+			"revision": "2d684516a8861da43017284349b7e303e809ac21",
+			"revisionTime": "2018-05-16T10:03:07Z"
 		},
 		{
+			"checksumSHA1": "SEnjvwVyfuU2xBaOfXfwPD5MZqk=",
 			"path": "github.com/mattn/go-colorable",
-			"revision": "9fdad7c47650b7d2e1da50644c1f4ba7f172f252",
-			"revisionTime": "2016-02-10T09:18:57+09:00"
+			"revision": "efa589957cd060542a26d2dd7832fd6a6c6c3ade",
+			"revisionTime": "2018-03-10T13:32:14Z"
 		},
 		{
+			"checksumSHA1": "w5RcOnfv5YDr3j2bd1YydkPiZx4=",
 			"path": "github.com/mattn/go-isatty",
-			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
-			"revisionTime": "2015-12-11T09:06:21+09:00"
+			"revision": "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c",
+			"revisionTime": "2017-11-07T05:05:31Z"
 		},
 		{
-			"checksumSHA1": "utxVR7t9nTiSfS+icPbmliS3aAs=",
+			"checksumSHA1": "RacbmFfXJJYcYbH0T13lASxOJzI=",
 			"path": "github.com/octavore/naga/service",
 			"revision": "7f3072b01689ed9a28e0bb0d9363e42335a5271f",
 			"revisionTime": "2017-07-29T05:58:18Z"
+		},
+		{
+			"checksumSHA1": "USMsFbKZrNd1b9oRFbjevPr6PmI=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "c4afb3effaa53fd9a06ca61262dc7ce8df4c081b",
+			"revisionTime": "2018-06-26T06:41:42Z"
 		}
 	],
 	"rootPath": "github.com/octavore/lightproxy"
