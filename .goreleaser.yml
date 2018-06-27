@@ -1,0 +1,19 @@
+build:
+  binary: lightproxy
+  flags: |
+    -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH"
+  goos:
+    - darwin
+    - linux
+  goarch:
+    - amd64
+
+archive:
+  format: tar.gz
+  files:
+    - LICENSE
+
+release:
+  github:
+    owner: octavore
+    name: lightproxy
