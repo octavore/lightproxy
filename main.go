@@ -46,7 +46,8 @@ func (a *App) Init(c *service.Config) {
 				os.Exit(1)
 			}
 			a.handlerIndex[e.Source] = i
-			fmt.Printf("loaded: %s => %s\n", e.Source, e.dest())
+			i := a.handlerIndex[e.Source] % len(colors)
+			fmt.Printf("loaded: %s => %s\n", colors[i](e.Source), e.dest())
 		}
 
 		router := http.NewServeMux()
