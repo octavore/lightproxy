@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultConfigDir = ".config"
-	version          = "1.0.2"
+	version          = "1.1.0"
 )
 
 func main() {
@@ -20,12 +20,12 @@ func main() {
 
 type App struct {
 	config       *Config
-	handlers     map[string]http.Handler
+	handlers     map[string]*Proxy
 	handlerIndex map[string]int // use for colors
 }
 
 func (a *App) Init(c *service.Config) {
-	a.handlers = make(map[string]http.Handler)
+	a.handlers = make(map[string]*Proxy)
 	a.handlerIndex = make(map[string]int)
 	a.addCommands(c)
 	c.SetDefaultCommand("start")
@@ -50,13 +50,8 @@ func (a *App) Init(c *service.Config) {
 			fmt.Printf("loaded: %s => %s\n", colors[i](e.Source), e.dest())
 		}
 
-		router := http.NewServeMux()
-		router.Handle("/", a)
-		router.HandleFunc("/proxy.pac", a.pacFile)
-
 		fmt.Printf("proxy URL: http://%s/proxy.pac\n", a.config.Addr)
-
-		err = http.ListenAndServe(a.config.Addr, router)
+		err = http.ListenAndServe(a.config.Addr, a)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
