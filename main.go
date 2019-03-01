@@ -40,7 +40,7 @@ func (a *App) Init(c *service.Config) {
 			os.Exit(1)
 		}
 		for i, e := range a.config.Entries {
-			a.handlers[e.Source], err = e.handle()
+			a.handlers[e.Source], err = NewProxy(e)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

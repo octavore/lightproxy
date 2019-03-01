@@ -80,8 +80,8 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 	b, err := json.MarshalIndent(&Config{
 		Addr: "localhost:7999",
 		TLD:  "wip",
-		Entries: []Entry{{
-			Source:   "ketchup.wip",
+		Entries: []*Entry{{
+			Source:   "example.wip",
 			DestHost: "localhost:8000",
 		}},
 	}, "", "  ")
@@ -134,7 +134,7 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		}
 	}
 	if !found {
-		a.config.Entries = append(a.config.Entries, Entry{
+		a.config.Entries = append(a.config.Entries, &Entry{
 			Source:   host,
 			DestHost: dest,
 		})
@@ -170,7 +170,7 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 		}
 	}
 	if !found {
-		a.config.Entries = append(a.config.Entries, Entry{
+		a.config.Entries = append(a.config.Entries, &Entry{
 			Source:     host,
 			DestFolder: absDir,
 		})
@@ -191,7 +191,7 @@ func (a *App) cmdRmHost(ctx *service.CommandContext) {
 	}
 
 	host := ctx.Args[0]
-	entries := []Entry{}
+	entries := []*Entry{}
 	for _, e := range a.config.Entries {
 		if e.Source != host {
 			entries = append(entries, e)

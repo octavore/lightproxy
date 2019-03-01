@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -29,6 +30,7 @@ func (a *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	host := req.Host
+	host = strings.TrimPrefix(host, "//")
 	host = portRegexp.ReplaceAllString(host, "")
 	if h := a.handlers[host]; h != nil {
 		i := a.handlerIndex[host] % len(colors)

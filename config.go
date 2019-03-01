@@ -9,9 +9,9 @@ import (
 )
 
 type Config struct {
-	TLD     string  `json:"tld"`
-	Addr    string  `json:"addr"`
-	Entries []Entry `json:"entries"`
+	TLD     string   `json:"tld"`
+	Addr    string   `json:"addr"`
+	Entries []*Entry `json:"entries"`
 }
 
 func (a *App) configDir() string {

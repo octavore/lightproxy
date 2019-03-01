@@ -8,10 +8,6 @@ type Entry struct {
 	DestFolder string `json:"dest_folder,omitempty"`
 }
 
-func (e *Entry) handle() (*Proxy, error) {
-	return NewProxy(e)
-}
-
 func (e *Entry) dest() string {
 	if e.DestHost != "" {
 		return e.DestHost
