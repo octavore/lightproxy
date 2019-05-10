@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -57,44 +56,10 @@ func (a *App) addCommands(c *service.Config) {
 }
 
 func (a *App) cmdInitConfig(ctx *service.CommandContext) {
-	fi, err := os.Stat(a.configPath())
-	if fi != nil && err == nil {
-		fmt.Printf("found init file: %s\n", a.configPath())
-		return
-	}
-	if !os.IsNotExist(err) {
-		ctx.Fatal("unknown error: %s", err)
-	}
-
-	err = os.MkdirAll(a.configDir(), os.ModePerm)
+	err := a.ensureConfig()
 	if err != nil {
-		ctx.Fatal("failed to create dir %s: %s", a.configDir(), err)
+		ctx.Fatal(err.Error())
 	}
-
-	f, err := os.Create(a.configPath())
-	defer f.Close()
-	if err != nil {
-		ctx.Fatal("failed to create dir %s: %s", a.configDir(), err)
-	}
-
-	b, err := json.MarshalIndent(&Config{
-		Addr:    "localhost:7999",
-		TLSAddr: "localhost:7998",
-		TLD:     "wip",
-		Entries: []*Entry{{
-			Source:   "example.wip",
-			DestHost: "localhost:8000",
-		}},
-	}, "", "  ")
-	if err != nil {
-		ctx.Fatal("failed to to create config.json file: %s", err)
-	}
-
-	_, err = f.Write(b)
-	if err != nil {
-		ctx.Fatal("failed to to create config.json file: %s", err)
-	}
-	fmt.Printf("created init file: %s\n", a.configPath())
 }
 
 func (a *App) cmdPrintConfig(ctx *service.CommandContext) {

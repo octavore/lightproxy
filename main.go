@@ -31,7 +31,12 @@ func (a *App) Init(c *service.Config) {
 	c.SetDefaultCommand("start")
 
 	c.Start = func() {
-		err := a.loadConfig()
+		err := a.ensureConfig()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = a.loadConfig()
 		if err != nil {
 			log.Fatalln(err)
 		}

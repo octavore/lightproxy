@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -51,4 +52,46 @@ func (a *App) writeConfig() error {
 		return err
 	}
 	return ioutil.WriteFile(a.configPath(), b, os.ModePerm)
+}
+
+func (a *App) ensureConfig() error {
+	fi, err := os.Stat(a.configPath())
+	if fi != nil && err == nil {
+		fmt.Printf("found config file: %s\n", a.configPath())
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return fmt.Errorf("unknown error: %s", err)
+	}
+
+	err = os.MkdirAll(a.configDir(), os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to create dir %s: %s", a.configDir(), err)
+	}
+
+	f, err := os.Create(a.configPath())
+	defer f.Close()
+	if err != nil {
+		return fmt.Errorf("failed to create dir %s: %s", a.configDir(), err)
+	}
+
+	b, err := json.MarshalIndent(&Config{
+		Addr:    "localhost:7999",
+		TLSAddr: "localhost:7998",
+		TLD:     "wip",
+		Entries: []*Entry{{
+			Source:   "example.wip",
+			DestHost: "localhost:8000",
+		}},
+	}, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to to create config.json file: %s", err)
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		return fmt.Errorf("failed to to create config.json file: %s", err)
+	}
+	fmt.Printf("created config.json file: %s\n", a.configPath())
+	return nil
 }
