@@ -1,6 +1,15 @@
 # lightproxy
 
-Lightweight proxy, useful for giving your local services memorable local domain names like `myproject.wip` instead of `localhost:8000`. TLS is also supported
+Lightweight local proxy, useful for giving your local services memorable local domain names like `myproject.wip` instead of `localhost:8000`.
+
+**Key features!**
+
+- Super simple proxy-based setup
+- Choose your own local tld, e.g. `.localhost` or `.wip`
+- Wildcard subdomains, e.g. `*.devserver.wip`
+- Zero config HTTPS support for all mapped URLs
+- Proxy mode: route requests to a local server
+- File server mode: serve files directly from a folder
 
 ## Usage
 
@@ -139,6 +148,10 @@ Resources
 - https://pypac.readthedocs.io/en/latest/about_pac.html
 
 ## Changelog
+
+### 2019-05-10 / 1.2
+
+- support wildcards in source url
 
 ### 2019-05-10 / 1.1
 
