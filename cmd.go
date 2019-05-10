@@ -78,8 +78,9 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 	}
 
 	b, err := json.MarshalIndent(&Config{
-		Addr: "localhost:7999",
-		TLD:  "wip",
+		Addr:    "localhost:7999",
+		TLSAddr: "localhost:7998",
+		TLD:     "wip",
 		Entries: []*Entry{{
 			Source:   "example.wip",
 			DestHost: "localhost:8000",

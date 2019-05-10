@@ -31,7 +31,3 @@ func NewProxy(e *Entry) (*Proxy, error) {
 	}
 	return proxy, nil
 }
-
-func (p *Proxy) ServeConnect(rw http.ResponseWriter, req *http.Request) {
-	fmt.Println("CONNECT: ignoring")
-}

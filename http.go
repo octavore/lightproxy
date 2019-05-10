@@ -38,11 +38,12 @@ func (a *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		if req.URL.RawQuery != "" {
 			pth += "?" + req.URL.RawQuery
 		}
-		log.Println(colors[i](host), pth)
 
 		if req.Method == "CONNECT" {
-			h.ServeConnect(rw, req)
+			log.Printf("(%s %s)", colors[i](host), "received CONNECT")
+			a.serveConnect(rw, req)
 		} else {
+			log.Println(colors[i](host), pth)
 			h.ServeHTTP(rw, req)
 		}
 		return

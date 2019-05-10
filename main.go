@@ -35,6 +35,12 @@ func (a *App) Init(c *service.Config) {
 		if err != nil {
 			log.Fatalln(err)
 		}
+		if a.config.Addr == "" {
+			a.config.Addr = "localhost:7999"
+		}
+		if a.config.TLSAddr == "" {
+			a.config.TLSAddr = "localhost:7998"
+		}
 		if len(a.config.Entries) == 0 {
 			fmt.Println("no entries found in config.json; exiting")
 			os.Exit(1)
@@ -51,10 +57,19 @@ func (a *App) Init(c *service.Config) {
 		}
 
 		fmt.Printf("proxy URL: http://%s/proxy.pac\n", a.config.Addr)
-		err = http.ListenAndServe(a.config.Addr, a)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		a.startServer()
+	}
+}
+
+func (a *App) startServer() {
+	err := a.startTLSProxy()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = http.ListenAndServe(a.config.Addr, a)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
