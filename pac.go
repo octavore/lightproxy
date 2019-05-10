@@ -1,19 +1,16 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"net/url"
+	"strings"
 )
 
 func (a *App) pacFile(rw http.ResponseWriter, req *http.Request) {
-	u, err := url.Parse(a.config.Addr)
-	if err != nil {
-		log.Fatalln("error parsing addr in config file:", err)
-	}
+	parts := strings.Split(a.config.Addr, ":")
+	port := parts[len(parts)-1]
 	rw.Write([]byte(`function FindProxyForURL(url, host) {
 	if (shExpMatch(host, "*.` + a.config.TLD + `")) {
-		return "PROXY 127.0.0.1:` + u.Port() + `";
+		return "PROXY 127.0.0.1:` + port + `";
 	}
 	return "DIRECT";
 }
