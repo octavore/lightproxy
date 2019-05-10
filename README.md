@@ -1,6 +1,6 @@
 # lightproxy
 
-Lightweight proxy, useful for giving your local services memorable local domain names like `myproject.wip` instead of `localhost:8000`.
+Lightweight proxy, useful for giving your local services memorable local domain names like `myproject.wip` instead of `localhost:8000`. TLS is also supported
 
 ## Usage
 
@@ -36,10 +36,87 @@ Open up a new terminal shell and run `lightproxy`.
 
 ![screen shot 2018-06-26 at 8 46 00 pm](https://user-images.githubusercontent.com/1707744/41951981-87e8f856-7982-11e8-8e95-c06cca186eb3.png)
 
-## todo
+## TLS
 
-- daemon mode
-- path based routing
-- prettier UI
+All proxied URLS are also available over https. Lightproxy does this by listening for TLS connections on a separate port (configurable).
+
+Please note that you will see browser warnings because lightproxy generates a self-signed certificate. To suppress the warnings, you can tell lightproxy to sign certificates using a locally trusted root CA.
+
+### Using a local root CA
+
+1. Generate a local CA key file
+
+   ```
+   openssl genrsa -out lightproxyCA.key 4096
+   openssl req -x509 -new -nodes -key lightproxyCA.key -sha256 -days 1024 -out lightproxyCA.crt
+   ```
+
+2. Trust the key file
+
+   If you are on a Mac, open **Keychain Access** in System Preference, select the **System** keychain, select the **Certificates** category, and drag your key file into the list of certificates.
+
+   Double click the certificate, open up the **Trust** section, and make sure _When using this certificate:_ is set to _Always Trust_. Restart your browsers for this to take effect.
+
+3. Set `ca_key_file` in lightproxy's config
+
+   Tell lightproxy where to find your files by setting the `ca_key_file` parameter in `config.json` (see below). Set it to the keyfile path you generated in step 1. Restart lightproxy.
+
+## config.json
+
+URL mappings can be added easily using the commands above, but you can also edit the config file directly.
+
+To view the current config and where it is saved, run this:
+
+```
+lightproxy config
+```
+
+**Example config**
+
+```jsonc
+{
+  # only hosts ending in this tld are handled by the proxy
+  "tld": "wip",
+
+  # the local addr the proxy listens on
+  "addr": "localhost:7999",
+
+  # the local addr the proxy listens on internally to handle
+  # TLSrequests
+  "tls_addr": "localhost:7998",
 
 
+  # if you are using a local CA, this should be set to the value
+  # of the *.key file. The corresponding *.crt should be in the same
+  # folder.
+  "ca_key_file": "...",
+
+  # all hosts to map. Entries must have `host` set, and
+  # either `dest` (a local addr), or `dest_folder` (a folder)
+  "entries": [
+    {
+      "host": "ketchup.wip",
+      "dest": "localhost:8000"
+    },
+    {
+      "host": "goatcodes.wip",
+      "dest": "localhost:8100"
+    },
+    {
+      "host": "go.goatcodes.wip",
+      "dest": "localhost:8100"
+    },
+    {
+      "host": "blog.goatcodes.wip",
+      "dest_folder": "/sites/goatblog"
+    }
+  ]
+}
+```
+
+## Changelog
+
+### 2019-05-10 / 1.1
+
+- added TLS support
+- added `tls_addr` and `ca_key_file` config option
