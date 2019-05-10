@@ -36,6 +36,10 @@ Open up a new terminal shell and run `lightproxy`.
 
 ![screen shot 2018-06-26 at 8 46 00 pm](https://user-images.githubusercontent.com/1707744/41951981-87e8f856-7982-11e8-8e95-c06cca186eb3.png)
 
+### Configure your system proxy (Windows)
+
+[See here](https://pypac.readthedocs.io/en/latest/about_pac.html#windows)
+
 ## TLS
 
 All proxied URLS are also available over https. Lightproxy does this by listening for TLS connections on a separate port (configurable).
@@ -113,6 +117,26 @@ lightproxy config
   ]
 }
 ```
+
+## Under the hood
+
+lightproxy uses a [proxy auto-config file](<https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_(PAC)_file>) to tell your system what URLs to send to the proxy.
+
+By default, this PAC file is served at `http://localhost:7999/proxy.pac`. It contains a simple javascript function:
+
+```js
+function FindProxyForURL(url, host) {
+  if (shExpMatch(host, '*.wip')) {
+    return 'PROXY 127.0.0.1:7999';
+  }
+  return 'DIRECT';
+}
+```
+
+Resources
+
+- https://findproxyforurl.com/example-pac-file/
+- https://pypac.readthedocs.io/en/latest/about_pac.html
 
 ## Changelog
 
