@@ -1,7 +1,9 @@
 build:
   binary: lightproxy
-  flags: |
-    -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH"
+  gcflags:
+    - -trimpath={{.Env.GOPATH}}
+  asmflags:
+    - -trimpath={{.Env.GOPATH}}"
   goos:
     - darwin
     - linux

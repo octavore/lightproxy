@@ -8,3 +8,9 @@ default:
 
 clean:
 	@rm *.tar.gz
+
+release:
+	goreleaser
+
+release-nr:
+	goreleaser --skip-publish
