@@ -63,7 +63,11 @@ func (a *App) cmdInitConfig(ctx *service.CommandContext) {
 }
 
 func (a *App) cmdPrintConfig(ctx *service.CommandContext) {
-	err := a.loadConfig()
+	err := a.ensureConfig()
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	err = a.loadConfig()
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
@@ -77,7 +81,11 @@ func (a *App) cmdPrintConfig(ctx *service.CommandContext) {
 
 func (a *App) cmdSetHost(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(2)
-	err := a.loadConfig()
+	err := a.ensureConfig()
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	err = a.loadConfig()
 	if err != nil {
 		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
@@ -114,7 +122,11 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 
 func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(2)
-	err := a.loadConfig()
+	err := a.ensureConfig()
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	err = a.loadConfig()
 	if err != nil {
 		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
@@ -150,7 +162,11 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 
 func (a *App) cmdRmHost(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(1)
-	err := a.loadConfig()
+	err := a.ensureConfig()
+	if err != nil {
+		ctx.Fatal(err.Error())
+	}
+	err = a.loadConfig()
 	if err != nil {
 		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
