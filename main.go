@@ -20,12 +20,11 @@ func main() {
 
 type App struct {
 	config       *Config
-	handlers     map[string]*Proxy
+	handlers     []*Proxy
 	handlerIndex map[string]int // use for colors
 }
 
 func (a *App) Init(c *service.Config) {
-	a.handlers = make(map[string]*Proxy)
 	a.handlerIndex = make(map[string]int)
 	a.addCommands(c)
 	c.SetDefaultCommand("start")
@@ -51,7 +50,11 @@ func (a *App) Init(c *service.Config) {
 			os.Exit(1)
 		}
 		for i, e := range a.config.Entries {
-			a.handlers[e.Source], err = NewProxy(e)
+			p, err := NewProxy(e)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			a.handlers = append(a.handlers, p)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

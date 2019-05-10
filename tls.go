@@ -91,8 +91,8 @@ func (a *App) loadTLSConfig(hostNames []string, caCert *tls.Certificate) (*tls.C
 
 func (a *App) startTLSProxy() error {
 	hostnames := []string{}
-	for h, _ := range a.handlers {
-		hostnames = append(hostnames, h)
+	for _, e := range a.handlers {
+		hostnames = append(hostnames, e.e.Source)
 	}
 
 	var ca *tls.Certificate

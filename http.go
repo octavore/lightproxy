@@ -32,22 +32,26 @@ func (a *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	host := req.Host
 	host = strings.TrimPrefix(host, "//")
 	host = portRegexp.ReplaceAllString(host, "")
-	if h := a.handlers[host]; h != nil {
-		i := a.handlerIndex[host] % len(colors)
-		pth := req.URL.Path
-		if req.URL.RawQuery != "" {
-			pth += "?" + req.URL.RawQuery
-		}
+	for i, h := range a.handlers {
+		if h.Match(req) {
+			c := i % len(colors)
+			pth := req.URL.Path
+			if req.URL.RawQuery != "" {
+				pth += "?" + req.URL.RawQuery
+			}
 
-		if req.Method == "CONNECT" {
-			log.Printf("(%s %s)", colors[i](host), "received CONNECT")
-			a.serveConnect(rw, req)
-		} else {
-			log.Println(colors[i](host), pth)
-			h.ServeHTTP(rw, req)
+			if req.Method == "CONNECT" {
+				log.Printf("(%s %s)", colors[c](host), "received CONNECT")
+				a.serveConnect(rw, req)
+			} else {
+				log.Println(colors[c](host), pth)
+				h.ServeHTTP(rw, req)
+			}
+			return
+			break
 		}
-		return
 	}
+
 	log.Println(color.RedString(host), req.URL.String())
 	http.Error(rw, "not mapped: "+host, http.StatusNotFound)
 }
