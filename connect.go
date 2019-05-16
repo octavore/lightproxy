@@ -15,7 +15,7 @@ func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request) {
 		http.Error(rw, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	rw.WriteHeader(http.StatusOK)
+
 	hijacker, ok := rw.(http.Hijacker)
 	if !ok {
 		http.Error(rw, "Hijacking not supported", http.StatusInternalServerError)
@@ -25,6 +25,8 @@ func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusServiceUnavailable)
 	}
+
+	clientConn.Write([]byte("HTTP/1.0 200 OK\r\n\r\n"))
 	go transfer(destConn, clientConn)
 	go transfer(clientConn, destConn)
 }
@@ -32,5 +34,5 @@ func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request) {
 func transfer(destination io.WriteCloser, source io.ReadCloser) {
 	defer destination.Close()
 	defer source.Close()
-	io.Copy(destination, source)
+	_, _ = io.Copy(destination, source)
 }
