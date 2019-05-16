@@ -82,7 +82,11 @@ func (a *App) loadTLSConfig(hostNames []string, caCert *tls.Certificate) (*tls.C
 	}
 
 	tlsConfig := &tls.Config{
-		NextProtos:   []string{"h2"}, // http/2
+		MinVersion: tls.VersionTLS12,
+		NextProtos: []string{
+			"http/1.1",
+			"h2", // http/2
+		},
 		Certificates: []tls.Certificate{cert},
 	}
 
