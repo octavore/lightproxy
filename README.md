@@ -51,7 +51,9 @@ Open up a new terminal shell and run `lightproxy`.
 
 ## TLS
 
-All proxied URLS are also available over https. Lightproxy does this by listening for TLS connections on a separate port (configurable).
+All proxied URLS are also automatically available over https, i.e. http://foo.wip is also served with https at https://foo.wip.
+
+Internally, lightproxy does this by listening for TLS connections on a separate port, 7998. You can change this port if it conflicts with another app you have running. You should never need to connect to it directly.
 
 Please note that you will see browser warnings because lightproxy generates a self-signed certificate. To suppress the warnings, you can tell lightproxy to sign certificates using a locally trusted root CA.
 
