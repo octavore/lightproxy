@@ -17,81 +17,108 @@ type Config struct {
 	Entries   []*Entry `json:"entries"`
 }
 
-func (a *App) configDir() string {
+var defaultConfig = &Config{
+	Addr:    "localhost:7999",
+	TLSAddr: "localhost:7998",
+	TLD:     "wip",
+	Entries: []*Entry{{
+		Source:   "example.wip",
+		DestHost: "localhost:8000",
+	}},
+}
+
+type configManager struct {
+	searchPaths []string
+}
+
+// newConfigManager sets up all the search paths and configPath
+func newConfigManager() (*configManager, error) {
+	cm := &configManager{}
 	c := os.Getenv("XDG_CONFIG_HOME")
-	if c == "" {
-		u, err := user.Current()
-		if uid := os.Getenv("SUDO_UID"); uid != "" {
-			u, err = user.LookupId(uid)
+	if c != "" {
+		cm.searchPaths = append(cm.searchPaths, path.Join(c, "lightproxy"))
+	}
+	cm.searchPaths = append(cm.searchPaths, getHomeConfigDir())
+	return cm, nil
+}
+
+// configPath() returns the active config file path, config file dir
+// and whether it exists or not.
+// This checks all search paths for an existing config file
+// XDG_CONFIG_HOME is the preferred path, but also fallback
+// gracefully to $HOME/.config
+func (cm *configManager) configPath() (string, string, bool) {
+	// default config path is the first search path
+	configDir := cm.searchPaths[0]
+
+	for _, dir := range cm.searchPaths {
+		configPath := path.Join(dir, "config.json")
+		fi, err := os.Stat(configPath)
+		if fi != nil && err == nil {
+			return configPath, dir, true
 		}
+		if !os.IsNotExist(err) {
+			// fmt.Printf("unknown error: %s\n", err)
+		}
+	}
+	return path.Join(configDir, "config.json"), configDir, false
+}
+
+func (cm *configManager) ensureAndLoad() (*Config, error) {
+	err := cm.ensure()
+	if err != nil {
+		return nil, err
+	}
+	configPath, _, exists := cm.configPath()
+	config := &Config{}
+	if exists {
+		f, err := ioutil.ReadFile(configPath)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-
-		c = path.Join(u.HomeDir, defaultConfigDir)
+		err = json.Unmarshal(f, config)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return path.Join(c, "lightproxy")
+	return config, nil
 }
 
-func (a *App) configPath() string {
-	return path.Join(a.configDir(), "config.json")
-}
-
-func (a *App) loadConfig() error {
-	f, err := ioutil.ReadFile(a.configPath())
+// writeConfig writes to the existing config file, or the first search path
+func (cm *configManager) writeConfig(config *Config) error {
+	configPath, _, _ := cm.configPath()
+	b, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
 	}
-	a.config = &Config{}
-	return json.Unmarshal(f, a.config)
+	return ioutil.WriteFile(configPath, b, os.ModePerm)
 }
 
-func (a *App) writeConfig() error {
-	b, err := json.MarshalIndent(a.config, "", "  ")
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(a.configPath(), b, os.ModePerm)
-}
-
-func (a *App) ensureConfig() error {
-	fi, err := os.Stat(a.configPath())
-	if fi != nil && err == nil {
-		fmt.Printf("found config file: %s\n", a.configPath())
+func (cm *configManager) ensure() error {
+	configPath, configDir, exists := cm.configPath()
+	if exists {
 		return nil
+	} else {
+		err := os.MkdirAll(configDir, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("failed to create dir %s: %s", configDir, err)
+		}
 	}
-	if !os.IsNotExist(err) {
-		return fmt.Errorf("unknown error: %s", err)
-	}
-
-	err = os.MkdirAll(a.configDir(), os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("failed to create dir %s: %s", a.configDir(), err)
-	}
-
-	f, err := os.Create(a.configPath())
-	defer f.Close()
-	if err != nil {
-		return fmt.Errorf("failed to create dir %s: %s", a.configDir(), err)
-	}
-
-	b, err := json.MarshalIndent(&Config{
-		Addr:    "localhost:7999",
-		TLSAddr: "localhost:7998",
-		TLD:     "wip",
-		Entries: []*Entry{{
-			Source:   "example.wip",
-			DestHost: "localhost:8000",
-		}},
-	}, "", "  ")
+	err := cm.writeConfig(defaultConfig)
 	if err != nil {
 		return fmt.Errorf("failed to to create config.json file: %s", err)
 	}
-
-	_, err = f.Write(b)
-	if err != nil {
-		return fmt.Errorf("failed to to create config.json file: %s", err)
-	}
-	fmt.Printf("created config.json file: %s\n", a.configPath())
+	fmt.Printf("created config.json file: %s\n", configPath)
 	return nil
+}
+
+func getHomeConfigDir() string {
+	u, err := user.Current()
+	if uid := os.Getenv("SUDO_UID"); uid != "" {
+		u, err = user.LookupId(uid)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return path.Join(u.HomeDir, ".config", "lightproxy")
 }

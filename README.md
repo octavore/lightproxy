@@ -151,11 +151,15 @@ Resources
 
 ## Changelog
 
+### 2019-12-11 / 1.2.1
+
+- Search both `$XDG_CONFIG_HOME` and `$HOME/.config/lightproxy for`config.json`(preferring the former if set). This change improves the`brew installation` experience while maintaining backward compatability.
+
 ### 2019-05-10 / 1.2
 
-- support wildcards in source url
+- Support wildcards in source url
 
 ### 2019-05-10 / 1.1
 
-- added TLS support
-- added `tls_addr` and `ca_key_file` config option
+- Added TLS support
+- Added `tls_addr` and `ca_key_file` config option

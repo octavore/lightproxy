@@ -56,38 +56,35 @@ func (a *App) addCommands(c *service.Config) {
 }
 
 func (a *App) cmdInitConfig(ctx *service.CommandContext) {
-	err := a.ensureConfig()
+	err := a.configManager.ensure()
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
 }
 
 func (a *App) cmdPrintConfig(ctx *service.CommandContext) {
-	err := a.ensureConfig()
+	configPath, _, exists := a.configManager.configPath()
+	if !exists {
+		fmt.Println("config file does not exist")
+		fmt.Println("run `lightproxy init` to initialize at " + configPath)
+		return
+	}
+	config, err := a.configManager.ensureAndLoad()
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
-	err = a.loadConfig()
+	b, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
-	b, err := json.MarshalIndent(a.config, "", "  ")
-	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	fmt.Printf("found config %s:\n\n", a.configPath())
+	fmt.Printf("found config file: %s\n\n", configPath)
 	fmt.Println(string(b))
 }
 
 func (a *App) cmdSetHost(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(2)
-	err := a.ensureConfig()
+	config, err := a.configManager.ensureAndLoad()
 	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	err = a.loadConfig()
-	if err != nil {
-		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
 	}
 
@@ -99,7 +96,7 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 
 	dest := fmt.Sprintf("localhost:%d", port)
 	found := false
-	for _, e := range a.config.Entries {
+	for _, e := range config.Entries {
 		if e.Source == host {
 			fmt.Printf("replacing existing entry for %s: %s\n", host, e.DestHost)
 			e.DestHost = dest
@@ -108,12 +105,12 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 		}
 	}
 	if !found {
-		a.config.Entries = append(a.config.Entries, &Entry{
+		config.Entries = append(config.Entries, &Entry{
 			Source:   host,
 			DestHost: dest,
 		})
 	}
-	err = a.writeConfig()
+	err = a.configManager.writeConfig(config)
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
@@ -122,13 +119,8 @@ func (a *App) cmdSetHost(ctx *service.CommandContext) {
 
 func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(2)
-	err := a.ensureConfig()
+	config, err := a.configManager.ensureAndLoad()
 	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	err = a.loadConfig()
-	if err != nil {
-		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
 	}
 
@@ -139,7 +131,7 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 	}
 	fmt.Println(absDir)
 	found := false
-	for _, e := range a.config.Entries {
+	for _, e := range config.Entries {
 		if e.Source == host {
 			fmt.Printf("replacing existing entry for %s: %s\n", host, e.DestHost)
 			e.DestHost = ""
@@ -148,12 +140,12 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 		}
 	}
 	if !found {
-		a.config.Entries = append(a.config.Entries, &Entry{
+		config.Entries = append(config.Entries, &Entry{
 			Source:     host,
 			DestFolder: absDir,
 		})
 	}
-	err = a.writeConfig()
+	err = a.configManager.writeConfig(config)
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}
@@ -162,25 +154,20 @@ func (a *App) cmdSetHostFolder(ctx *service.CommandContext) {
 
 func (a *App) cmdRmHost(ctx *service.CommandContext) {
 	ctx.RequireExactlyNArgs(1)
-	err := a.ensureConfig()
+	config, err := a.configManager.ensureAndLoad()
 	if err != nil {
-		ctx.Fatal(err.Error())
-	}
-	err = a.loadConfig()
-	if err != nil {
-		// todo: more helpful error if config.json does not exist
 		ctx.Fatal(err.Error())
 	}
 
 	host := ctx.Args[0]
 	entries := []*Entry{}
-	for _, e := range a.config.Entries {
+	for _, e := range config.Entries {
 		if e.Source != host {
 			entries = append(entries, e)
 		}
 	}
-	a.config.Entries = entries
-	err = a.writeConfig()
+	config.Entries = entries
+	err = a.configManager.writeConfig(config)
 	if err != nil {
 		ctx.Fatal(err.Error())
 	}

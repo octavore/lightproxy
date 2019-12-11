@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	defaultConfigDir = ".config"
-	version          = "1.2.0"
+	version = "1.2.1"
 )
 
 func main() {
@@ -19,9 +18,10 @@ func main() {
 }
 
 type App struct {
-	config       *Config
-	handlers     []*Proxy
-	handlerIndex map[string]int // use for colors
+	config        *Config
+	configManager *configManager
+	handlers      []*Proxy
+	handlerIndex  map[string]int // use for colors
 }
 
 func (a *App) Init(c *service.Config) {
@@ -29,16 +29,22 @@ func (a *App) Init(c *service.Config) {
 	a.addCommands(c)
 	c.SetDefaultCommand("start")
 
+	c.Setup = func() error {
+		cm, err := newConfigManager()
+		if err != nil {
+			return err
+		}
+		a.configManager = cm
+		return nil
+	}
+
 	c.Start = func() {
-		err := a.ensureConfig()
+		config, err := a.configManager.ensureAndLoad()
 		if err != nil {
 			log.Fatalln(err)
 		}
 
-		err = a.loadConfig()
-		if err != nil {
-			log.Fatalln(err)
-		}
+		a.config = config
 		if a.config.Addr == "" {
 			a.config.Addr = "localhost:7999"
 		}
