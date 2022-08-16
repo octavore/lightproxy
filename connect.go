@@ -10,6 +10,10 @@ import (
 // serveConnect handles a CONNECT call on a.config.Addr and connects it to the
 // tlsProxy on a.config.TLSAddr
 func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request) {
+	if req.URL.Port() != "443" {
+		return
+	}
+
 	destConn, err := net.DialTimeout("tcp", a.config.TLSAddr, 10*time.Second)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusServiceUnavailable)
