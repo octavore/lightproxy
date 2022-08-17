@@ -42,7 +42,7 @@ func (a *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 			if req.Method == "CONNECT" {
 				log.Printf("%s (received CONNECT)", colors[c](host))
-				a.serveConnect(rw, req)
+				a.serveConnect(rw, req, h.e)
 			} else {
 				log.Println(colors[c](host), pth)
 				h.ServeHTTP(rw, req)
