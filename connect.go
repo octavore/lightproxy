@@ -5,12 +5,18 @@ import (
 	"net"
 	"net/http"
 	"time"
+	"strings"
 )
 
 // serveConnect handles a CONNECT call on a.config.Addr and connects it to the
 // tlsProxy on a.config.TLSAddr
-func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request) {
-	destConn, err := net.DialTimeout("tcp", a.config.TLSAddr, 10*time.Second)
+func (a *App) serveConnect(rw http.ResponseWriter, req *http.Request, entry *Entry) {
+	destHost := strings.TrimPrefix(entry.DestHost, "http://")
+	if req.URL.Port() == "443" {
+		destHost = a.config.TLSAddr
+	}
+
+	destConn, err := net.DialTimeout("tcp", destHost, 10*time.Second)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusServiceUnavailable)
 		return
