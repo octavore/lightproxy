@@ -19,6 +19,12 @@ Lightweight local proxy, useful for giving your local services memorable local d
 brew install octavore/tools/lightproxy
 ```
 
+To have homebrew start lightproxy when you start your computer
+
+```
+brew services start octavore/tools/lightproxy
+```
+
 ### Registering URL mappings
 
 To map `foo.wip` to `localhost:3000`:
@@ -55,9 +61,15 @@ All proxied URLS are also automatically available over https, i.e. http://foo.wi
 
 Internally, lightproxy does this by listening for TLS connections on a separate port, 7998. You can change this port if it conflicts with another app you have running. You should never need to connect to it directly.
 
-Please note that you will see browser warnings because lightproxy generates a self-signed certificate. To suppress the warnings, you can tell lightproxy to sign certificates using a locally trusted root CA.
+Please note that you will see browser warnings because lightproxy generates a self-signed certificate. To suppress the warnings, you can tell lightproxy to sign certificates using a locally trusted root CA. There are two ways to do this: using [`mkcert`](https://github.com/FiloSottile/mkcert), or generating your own local CA using openssl.
 
-### Using a local root CA
+### Option 1: Generate a local root CA with openssl
+
+1. Install [`mkcert`](https://github.com/FiloSottile/mkcert) with `brew install mkcert`
+2. Run `mkcert -install` to generate and install its root CA
+3. Set `mkcert` to `true` in `config.json`.
+
+### Option 2: Generate a local root CA with openssl
 
 1. Generate a local CA key file
 
@@ -101,10 +113,17 @@ lightproxy config
   "tls_addr": "localhost:7998",
 
 
+  # if you are using mkcert for your local CA, this should be set to true
+  "mkcert": false,
+
   # if you are using a local CA, this should be set to the value
   # of the *.key file. The corresponding *.crt should be in the same
   # folder.
   "ca_key_file": "...",
+
+  # if you are using a local CA, this should be set to the value
+  # of the certificate file, if it cannot be inferred from the ca_key_file value.
+  "ca_cert_file": "...",
 
   # all hosts to map. Entries must have `host` set, and
   # either `dest` (a local addr), or `dest_folder` (a folder)
@@ -137,10 +156,10 @@ By default, this PAC file is served at `http://localhost:7999/proxy.pac`. It con
 
 ```js
 function FindProxyForURL(url, host) {
-  if (shExpMatch(host, '*.wip')) {
-    return 'PROXY 127.0.0.1:7999';
+  if (shExpMatch(host, "*.wip")) {
+    return "PROXY 127.0.0.1:7999";
   }
-  return 'DIRECT';
+  return "DIRECT";
 }
 ```
 
@@ -149,7 +168,17 @@ Resources
 - https://findproxyforurl.com/example-pac-file/
 - https://pypac.readthedocs.io/en/latest/about_pac.html
 
+## Known issues
+
+- Secure websockets do not proxy correctly in Safari.
+
 ## Changelog
+
+### 2022-08-20 / 1.3.0
+
+- [Fixed support for secure websockets](https://github.com/octavore/lightproxy/pull/4) (credit: @jonian)
+- Add support for `mkcert` in config.
+- Add support for explicitly defining CA cert file in config: `ca_cert_file`.
 
 ### 2019-12-11 / 1.2.1
 
