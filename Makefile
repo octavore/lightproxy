@@ -10,7 +10,7 @@ clean:
 	@rm *.tar.gz
 
 release:
-	goreleaser
+	goreleaser release --rm-dist
 
 release-nr:
 	goreleaser release --skip-publish
