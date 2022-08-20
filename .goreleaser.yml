@@ -10,10 +10,10 @@ build:
   goarch:
     - amd64
 
-archive:
-  format: tar.gz
-  files:
-    - LICENSE
+archives:
+  - format: tar.gz
+    files:
+      - LICENSE
 
 release:
   github:

@@ -13,4 +13,7 @@ release:
 	goreleaser
 
 release-nr:
-	goreleaser --skip-publish
+	goreleaser release --skip-publish
+
+release-snapshot:
+	goreleaser release --snapshot --rm-dist
