@@ -12,14 +12,19 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"os"
+	"os/exec"
+	"path"
 	"strings"
 	"time"
 )
 
 // see readme for generating a local CA
-func (a *App) loadCACert(caKeyFile string) (*tls.Certificate, error) {
-	crtFile := strings.TrimSuffix(caKeyFile, ".key") + ".crt"
-	ca, err := tls.LoadX509KeyPair(crtFile, caKeyFile)
+func (a *App) loadCACert(caKeyFile, caCertFile string) (*tls.Certificate, error) {
+	if caCertFile == "" {
+		caCertFile = strings.TrimSuffix(caKeyFile, ".key") + ".crt"
+	}
+	ca, err := tls.LoadX509KeyPair(caCertFile, caKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +106,34 @@ func (a *App) startTLSProxy() error {
 
 	var ca *tls.Certificate
 	var err error
-	if a.config.CAKeyFile != "" {
-		ca, err = a.loadCACert(a.config.CAKeyFile)
+
+	if a.config.UseMkcert {
+		cmd := exec.Command("mkcert", "-CAROOT")
+		mkcertOut, err := cmd.Output()
+		if err != nil {
+			return err
+		}
+		mkcertRoot := strings.TrimSpace(string(mkcertOut))
+		if mkcertRoot == "" {
+			return fmt.Errorf("No directory found for mkcert; have you run mkcert -install?")
+		}
+		caKeyFile := path.Join(mkcertRoot, "rootCA-key.pem")
+		caCertFile := path.Join(mkcertRoot, "rootCA.pem")
+
+		if _, err = os.Stat(caKeyFile); os.IsNotExist(err) {
+			return fmt.Errorf("mkcert key file not found; have you run mkcert -install?")
+		}
+		if _, err = os.Stat(caCertFile); os.IsNotExist(err) {
+			return fmt.Errorf("mkcert cert file not found; have you run mkcert -install?")
+		}
+
+		ca, err = a.loadCACert(caKeyFile, caCertFile)
+		if err != nil {
+			return err
+		}
+		fmt.Println("tls: using mkcert")
+	} else if a.config.CAKeyFile != "" {
+		ca, err = a.loadCACert(a.config.CAKeyFile, a.config.CACertFile)
 		if err != nil {
 			return err
 		}
@@ -124,7 +155,7 @@ func (a *App) startTLSProxy() error {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		Handler:      a,
-		TLSConfig:    tlsConfig,
+		TLSConfig: tlsConfig,
 	}
 	fmt.Println("tls: listening on", tlsAddr)
 	go tlsServer.Serve(l)

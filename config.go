@@ -10,11 +10,13 @@ import (
 )
 
 type Config struct {
-	TLD       string   `json:"tld"`
-	Addr      string   `json:"addr"`
-	TLSAddr   string   `json:"tls_addr"`
-	CAKeyFile string   `json:"ca_key_file"`
-	Entries   []*Entry `json:"entries"`
+	TLD        string   `json:"tld"`
+	Addr       string   `json:"addr"`
+	TLSAddr    string   `json:"tls_addr"`
+	CAKeyFile  string   `json:"ca_key_file"`
+	CACertFile string   `json:"ca_cert_file"`
+	UseMkcert  bool     `json:"mkcert"`
+	Entries    []*Entry `json:"entries"`
 }
 
 var defaultConfig = &Config{
